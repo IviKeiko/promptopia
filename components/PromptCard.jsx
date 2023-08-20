@@ -55,7 +55,7 @@ const PromptCard = ({ prompt, handleTagClick, handleEdit, handleDelete }) => {
         className="font-inter text-sm blue-gradient cursor-pointer"
         onClick={() => handleTagClick && handleTagClick(prompt.tag)}
       >
-        {prompt.tag}
+        #{prompt.tag}
       </p>
       {/* if currently logged user is creator && if is on profile page only than return div */}
       {session?.user.id === prompt.creator._id && pathName === "/profile" && (
