@@ -20,8 +20,11 @@ const PromptCardList = ({ data, handleTagClick }) => {
 };
 
 const Feed = () => {
-  const [searchText, setSearchText] = useState("");
   const [prompts, setPrompts] = useState([]);
+
+  const [searchText, setSearchText] = useState("");
+  const [searchedResults, setSearchedResults] = useState([]);
+  const [searchTimeout, setSearchTimeout] = useState(null);
 
   useEffect(() => {
     const fetchPrompts = async () => {
@@ -32,9 +35,40 @@ const Feed = () => {
     fetchPrompts();
   }, []);
 
-  console.log(prompts);
+  const searchPrompts = (searchText) => {
+    const normalizedSearchText = searchText.toLowerCase();
 
-  const handleSearchChange = (e) => {};
+    return prompts.filter((item) => {
+      const usernameMatch = item.creator.username
+        .toLowerCase()
+        .includes(normalizedSearchText);
+      const tagMatch = item.tag.toLowerCase().includes(normalizedSearchText);
+      const promptMatch = item.prompt
+        .toLowerCase()
+        .includes(normalizedSearchText);
+
+      return usernameMatch || tagMatch || promptMatch;
+    });
+  };
+  const handleSearchChange = (e) => {
+    clearTimeout(searchTimeout);
+    setSearchText(e.target.value);
+
+    setSearchTimeout(
+      setTimeout(() => {
+        const searchResults = searchPrompts(e.target.value);
+        setSearchedResults(searchResults);
+      }, 500)
+    );
+  };
+
+  const handleTagClick = (tagName) => {
+    setSearchText(tagName);
+
+    const searchResult = searchPrompts(tagName);
+    setSearchedResults(searchResult);
+  };
+
   return (
     <section className="feed">
       <form className="relative w-full flex-center">
@@ -48,7 +82,14 @@ const Feed = () => {
         />
       </form>
 
-      <PromptCardList data={prompts} handleTagClick={() => {}} />
+      {searchText ? (
+        <PromptCardList
+          data={searchedResults}
+          handleTagClick={handleTagClick}
+        />
+      ) : (
+        <PromptCardList data={prompts} handleTagClick={handleTagClick} />
+      )}
     </section>
   );
 };
